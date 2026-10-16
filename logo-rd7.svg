@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 510 108" role="img" aria-labelledby="title">
+ <title id="title">RD7 Publicidade</title>
+ <text x="1" y="86" font-family="Arial Black,Manrope,Arial,sans-serif" font-size="98" font-weight="900" letter-spacing="-10" fill="#181818">RD7</text>
+ <g fill="#ff702f" transform="translate(203 20) scale(.62)"><path d="M-5-3H5V-25H-5ZM-5 3H5V25H-5ZM3-5V5H25V-5ZM-25-5V5H-3V-5Z"/><path d="M-3-4 4 3 20-13 13-20ZM-20 13l7 7L4 3l-7-7ZM-20-13l16 16 7-7-16-16ZM-3 4l16 16 7-7L4-3Z"/></g>
+ <path d="M243 24v60" stroke="#bbb8b0" stroke-width="1.5"/>
+ <text x="264" y="65" fill="#181818" font-family="Manrope,Arial,sans-serif" font-weight="800" font-size="23" letter-spacing="1.4">PUBLICIDADE</text>
+</svg>
