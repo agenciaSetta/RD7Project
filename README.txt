@@ -1,36 +1,47 @@
-RD7 PUBLICIDADE — SITE 2.0
-========================
+RD7 PUBLICIDADE | ATUALIZAÇÃO DO SITE — NOVEMBRO/2026
+====================================================
 
-O QUE MUDOU
-- Nova identidade editorial, com asterisco laranja e assinatura “RD7 Publicidade”.
-- Tipografia Manrope / DM Sans, mais leve e legível.
-- Conteúdo resumido na tela, com sete categorias de serviços expansíveis.
-- Navegação responsiva, estúdio em destaque e portfólio conceitual transparente.
-- Formulário que prepara o briefing para WhatsApp/e-mail ou cópia manual.
+CONTEÚDO ATUALIZADO
+- Topo: Agência RD7 — criatividade, audiovisual e inteligência artificial.
+- CTA principal: "Fale com um especialista".
+- Cinco categorias interativas:
+  1. Produção Audiovisual & Filmmaker
+  2. Criação & Design
+  3. Redes Sociais & Monetização
+  4. Influenciadores & Podcasts
+  5. Inovação, IA & Consultoria
+- A descrição duplicada "Desenvolvimento de Site" foi agrupada em "Criação de sites e landing pages".
+- Seção Estúdio alinhada aos novos serviços.
+- CTA final: "Pronto para levar sua marca para o próximo nível?" + "Solicitar orçamento agora".
+- Menu, WhatsApp flutuante e formulário de envio por e-mail preservados.
+- Campos de seleção do formulário atualizados para as cinco áreas.
+- Ícones continuam 100% em SVG; não dependem dos emojis do dispositivo.
+- Estudos de portfólio mantidos com indicação de que são conceituais.
 
-ANTES DE PUBLICAR
-1. Abra site.config.js e preencha WhatsApp, email e redes sociais.
-2. Substitua os três estudos conceituais da seção Projetos por cases reais
-   quando estiverem disponíveis. Eles NÃO são trabalhos reais da RD7.
-3. Se quiser receber mensagens de forma automática, será necessária
-   integração com servidor ou serviço de formulários. Este site é estático.
-4. Confira e aprove os textos de apresentação e logotipo com o cliente.
+COMO PUBLICAR
+1. Extraia o ZIP.
+2. Envie o CONTEÚDO da pasta para a raiz do repositório GitHub Pages.
+3. Substitua os arquivos antigos (index.html, styles.css, script.js, site.config.js,
+   README.txt e a pasta assets).
+4. Espere o GitHub Pages publicar a versão e abra o site.
+5. Se necessário, atualize o navegador para ignorar o cache.
 
-PUBLICAÇÃO NO GITHUB PAGES
-Envie o CONTEÚDO desta pasta (index.html, styles.css, script.js,
-site.config.js e assets/) para a raiz da branch publicada. Em Settings >
-Pages, escolha Deploy from a branch, branch main e / (root).
+WHATSAPP / E-MAIL
+No arquivo site.config.js, você pode mudar os canais configurados.
+- WhatsApp atual: 55 11 94525-2451.
+- E-mail atual: contato@rd7publicidade.com.br (sempre em minúsculas).
 
-Para evitar conflitos com a versão anterior, apague do repositório
-arquivos antigos que não fazem mais parte do projeto.
+FORMULÁRIO
+- Envio via FormSubmit, serviço externo; GitHub Pages não envia e-mails sozinho.
+- O dono do endereço deve confirmar a ativação do FormSubmit na caixa de entrada.
+- Depois de ativar, realize um segundo teste real no site publicado.
+- A resposta de sucesso confirma o recebimento pelo FormSubmit, não garante
+  entrega imediata à caixa do destinatário.
+- Se o envio falhar, o site oferece alternativa e não afirma sucesso.
+- O campo antispam (_honey) permanece invisível no HTML.
+- Nenhum e-mail real foi enviado durante esta atualização.
 
-ARQUIVOS
-index.html         conteúdo e estrutura do site
-styles.css         identidade visual, layout e responsividade
-script.js          menu, accordion, portfólio e formulário
-site.config.js     contatos editáveis
-assets/favicon.svg ícone do navegador
-assets/logo-rd7.svg versão vetorial da marca
-
-Compatível com sites estáticos (GitHub Pages/Netlify/Vercel/etc).
-As fontes carregam do Google Fonts; sem rede, são usadas fontes do sistema.
+ATENÇÃO
+- Para substituir os estudos de portfólio por cases de clientes, publique
+  apenas projetos autorizados e informações verificáveis.
+- Hospedagem estática; sem banco de dados próprio.

@@ -1,18 +1,12 @@
 /**
- * RD7 | DADOS DE CONTATO
- * Preencha para ativar os links de envio e das redes sociais.
- * Não coloque dados pessoais ou senhas neste arquivo público.
- *
- * whatsapp: DDI + DDD + número sem espaços/símbolos, ex.: 5511999999999
- * email: endereço de e-mail comercial
- * instagram, linkedin: links completos com https://
- *
- * Se WhatsApp/e-mail estiverem vazios, o visitante ainda consegue
- * preparar e copiar a mensagem. Nenhum envio é simulado.
+ * RD7 Publicidade — contatos oficiais exibidos no site.
+ * Para trocar o WhatsApp ou o e-mail, altere as chaves abaixo.
+ * Formato: código do país (55) + DDD (11) + número, sem espaços.
+ * O site é estático e esses dados são públicos, portanto não inclua senhas.
  */
 window.RD7_CONFIG = {
-  whatsapp: "",
-  email: "",
+  whatsapp: "5511945252451",
+  email: "contato@rd7publicidade.com.br",
   instagram: "",
   linkedin: ""
 };

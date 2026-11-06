@@ -4,6 +4,18 @@
   document.documentElement.classList.add('js');
   const $ = (selector, context = document) => context.querySelector(selector);
   const $$ = (selector, context = document) => Array.from(context.querySelectorAll(selector));
+  // Os ícones não dependem de glifos Unicode: sempre SVG vetorial.
+  const makeIcon = (name, extraClass = '') => {
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('class', `icon ${extraClass}`.trim());
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
+    const use = document.createElementNS(svgNS, 'use');
+    use.setAttribute('href', `#rd7-${name}`);
+    svg.appendChild(use);
+    return svg;
+  };
   const config = window.RD7_CONFIG || {};
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -80,8 +92,38 @@
   // Links de redes sociais: aparecem somente após configuração pelo dono do site.
   const whatsapp = String(config.whatsapp || '').replace(/\D/g, '');
   const hasWhatsapp = whatsapp.length >= 11 && whatsapp.length <= 15;
-  const email = String(config.email || '').trim();
+  const email = String(config.email || '').trim().toLowerCase();
   const hasEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  // Botão de WhatsApp independente do formulário, sempre com o número configurado.
+  const floatWhatsApp = $('#whatsapp-float');
+  if (floatWhatsApp && hasWhatsapp) {
+    const greeting = 'Olá! Vim pelo site da RD7 Publicidade e gostaria de conversar sobre um projeto.';
+    floatWhatsApp.href = `https://wa.me/${whatsapp}?text=${encodeURIComponent(greeting)}`;
+    floatWhatsApp.hidden = false;
+  }
+
+  // Contatos visíveis para quem prefere chamar diretamente ou enviar e-mail.
+  const contactDirect = $('#contact-direct');
+  const addContact = (label, url, iconName, external = false) => {
+    if (!contactDirect) return;
+    const link = document.createElement('a');
+    link.href = url;
+    if (external) { link.target = '_blank'; link.rel = 'noopener noreferrer'; }
+    link.appendChild(makeIcon(iconName));
+    link.appendChild(document.createTextNode(label));
+    contactDirect.appendChild(link);
+  };
+  if (hasWhatsapp) {
+    const local = whatsapp.startsWith('55') ? whatsapp.slice(2) : whatsapp;
+    const formatted = /^\d{11}$/.test(local)
+      ? `(${local.slice(0, 2)}) ${local.slice(2, 7)}-${local.slice(7)}`
+      : local;
+    addContact(`WhatsApp: ${formatted}`, `https://wa.me/${whatsapp}`, 'whatsapp', true);
+  }
+  if (hasEmail) addContact(email, `mailto:${email}`, 'mail');
+  if (contactDirect && !contactDirect.children.length) contactDirect.hidden = true;
+
   const socialLinks = $('#social-links');
   const socialEntries = [['Instagram', config.instagram], ['LinkedIn', config.linkedin]];
   if (hasWhatsapp) socialEntries.push(['WhatsApp', `https://wa.me/${whatsapp}`]);
@@ -100,36 +142,44 @@
   });
   if (socialLinks && socialLinks.querySelectorAll('a').length === 0) socialLinks.hidden = true;
 
-  // Formulário sem backend: prepara o texto e oferece os canais reais.
+  // Envio do formulário: FormSubmit encaminha o briefing por e-mail.
+  // Em hospedagem estática (GitHub Pages) não existe backend próprio de e-mail.
   const form = $('#contact-form');
   const formError = $('#form-error');
-  const dialog = $('#message-dialog');
-  const messagePreview = $('#message-preview');
-  const actions = $('#message-actions');
-  const status = $('#message-status');
-  const closeDialog = $('.dialog-close');
+  const formSuccess = $('#form-success');
+  const formSubmit = $('#form-submit');
+  const fallback = $('#form-fallback');
   const normalize = value => String(value || '').trim();
   const readValue = id => normalize($('#' + id)?.value);
+  let submitting = false;
 
-  const addLink = (label, href, options = {}) => {
-    if (!actions) return;
-    const a = document.createElement('a');
-    a.textContent = label;
-    a.href = href;
-    if (options.external) {
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-    }
-    actions.appendChild(a);
-  };
+  if (form && hasEmail) {
+    // Mantém o endereço centralizado em site.config.js para futuras alterações.
+    form.action = `https://formsubmit.co/${encodeURIComponent(email)}`;
+  }
+  fallback?.addEventListener('click', () => {
+    if (!form || !hasEmail || submitting) return;
+    // POST tradicional: pode abrir a etapa de verificação/captcha do FormSubmit.
+    form.submit();
+  });
 
-  form?.addEventListener('submit', event => {
+  form?.addEventListener('submit', async event => {
     event.preventDefault();
+    if (submitting) return;
     formError.hidden = true;
+    formSuccess.hidden = true;
+    fallback.hidden = true;
+
+    if (!hasEmail) {
+      formError.textContent = 'O e-mail de atendimento não está configurado. Entre em contato pelo WhatsApp.';
+      formError.hidden = false;
+      return;
+    }
+
     const fields = [$('#nome'), $('#whatsapp'), $('#email'), $('#assunto'), $('#mensagem')];
     for (const field of fields) {
       if (!field || !field.validity.valid) {
-        formError.textContent = 'Confira os campos obrigatórios antes de continuar.';
+        formError.textContent = 'Confira os campos obrigatórios antes de enviar.';
         formError.hidden = false;
         field?.reportValidity();
         field?.focus();
@@ -143,56 +193,43 @@
       $('#whatsapp').focus();
       return;
     }
-    const briefing = [
-      'Olá, RD7! Tenho interesse em conversar sobre um projeto.',
-      '',
-      `Nome: ${readValue('nome')}`,
-      ...(readValue('empresa') ? [`Empresa/marca: ${readValue('empresa')}`] : []),
-      `WhatsApp: ${readValue('whatsapp')}`,
-      `E-mail: ${readValue('email')}`,
-      `Interesse: ${readValue('assunto')}`,
-      '',
-      'Sobre o projeto:',
-      readValue('mensagem')
-    ].join('\n');
+    // Se o campo antispam for preenchido por um bot, descartamos o envio.
+    if (form.elements.namedItem('_honey')?.value) return;
 
-    if (!dialog || !messagePreview || !actions) return;
-    messagePreview.value = briefing;
-    actions.replaceChildren();
-    status.textContent = '';
+    const payload = Object.fromEntries(new FormData(form).entries());
+    payload._subject = `Novo projeto pelo site RD7 — ${readValue('assunto')}`;
+    payload._url = location.href.split('#')[0];
+    submitting = true;
+    formSubmit.disabled = true;
+    formSubmit.setAttribute('aria-busy', 'true');
+    formSubmit.firstChild.textContent = 'Enviando... ';
 
-    if (hasWhatsapp) addLink('Abrir WhatsApp ↗', `https://wa.me/${whatsapp}?text=${encodeURIComponent(briefing)}`, { external: true });
-    if (hasEmail) {
-      const subject = `Novo contato pelo site RD7 — ${readValue('assunto')}`;
-      addLink('Abrir e-mail ↗', `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(briefing)}`);
-    }
-
-    const copyButton = document.createElement('button');
-    copyButton.type = 'button';
-    copyButton.textContent = 'Copiar mensagem';
-    copyButton.addEventListener('click', async () => {
-      try {
-        if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(messagePreview.value);
-        else {
-          messagePreview.select();
-          if (!document.execCommand('copy')) throw new Error('Cópia indisponível');
-        }
-        copyButton.textContent = 'Copiado ✓';
-        status.textContent = 'Mensagem copiada. Você pode colá-la no canal de contato desejado.';
-      } catch (_) {
-        messagePreview.focus();
-        messagePreview.select();
-        status.textContent = 'Selecione e copie o texto acima manualmente.';
+    try {
+      const response = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(email)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const result = await response.json();
+      if (!response.ok || !(result.success === true || result.success === 'true')) {
+        throw new Error('O serviço de envio não confirmou o recebimento.');
       }
-    });
-    actions.appendChild(copyButton);
-    if (!hasWhatsapp && !hasEmail) {
-      status.textContent = 'Os canais de atendimento ainda não foram configurados. Copie a mensagem para enviá-la manualmente.';
+      form.reset();
+      formSuccess.hidden = false;
+      formSuccess.focus({ preventScroll: true });
+      formSuccess.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
+    } catch (_) {
+      // Não declara sucesso se houve erro de rede ou o serviço não confirmou.
+      formError.textContent = 'Não foi possível confirmar o envio. Tente novamente ou use o envio alternativo.';
+      formError.hidden = false;
+      fallback.hidden = false;
+    } finally {
+      submitting = false;
+      formSubmit.disabled = false;
+      formSubmit.removeAttribute('aria-busy');
+      formSubmit.firstChild.textContent = 'Enviar projeto ';
     }
-    dialog.showModal();
   });
-  closeDialog?.addEventListener('click', () => dialog?.close());
-  dialog?.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
   const year = $('#year');
   if (year) year.textContent = String(new Date().getFullYear());
 })();
